@@ -384,7 +384,7 @@ export default function Home() {
           <div className={styles.analyzePane}>
             <div className={styles.intro}>
               <p className={styles.introTitle}>Trending TikTok hashtags — United Kingdom</p>
-              <p className={styles.introSub}>Pull current trending hashtags in the US and get Liberation-specific hooks and angles for each relevant trend.</p>
+              <p className={styles.introSub}>Pull current trending hashtags in the UK and get Liberation-specific hooks and angles for each relevant trend.</p>
             </div>
             <div className={styles.field}>
               <label className={styles.label}>Time period</label>
