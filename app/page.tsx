@@ -209,7 +209,7 @@ export default function Home() {
             </div>
             <div className={styles.field}>
               <label className={styles.label}>Source</label>
-              <input type="text" placeholder="e.g. Reddit r/AskNYC — making friends thread" value={source} onChange={e => setSource(e.target.value)} className={styles.input} />
+              <input type="text" placeholder="e.g. Reddit r/AskNYC — garden party drinks ideas" value={source} onChange={e => setSource(e.target.value)} className={styles.input} />
             </div>
             <div className={styles.field}>
               <label className={styles.label}>Raw text</label>
@@ -305,7 +305,7 @@ export default function Home() {
             </div>
             <div className={styles.field}>
               <label className={styles.label}>Keyword</label>
-              <input type="text" placeholder="e.g. making friends NYC, solo activities, friend group" value={compKeyword} onChange={e => setCompKeyword(e.target.value)} onKeyDown={e => e.key === 'Enter' && analyzeCompetitor()} className={styles.input} />
+              <input type="text" placeholder="e.g. buzzballz, moth, beatbox" value={compKeyword} onChange={e => setCompKeyword(e.target.value)} onKeyDown={e => e.key === 'Enter' && analyzeCompetitor()} className={styles.input} />
             </div>
             {compError && <p className={styles.error}>{compError}</p>}
             <button className={styles.analyzeBtn} onClick={analyzeCompetitor} disabled={compLoading}>{compLoading ? 'Searching TikTok...' : 'Analyze →'}</button>
