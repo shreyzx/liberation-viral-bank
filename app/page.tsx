@@ -404,7 +404,7 @@ export default function Home() {
                   <p style={{ fontSize: '14px', lineHeight: 1.65 }}>{trendResult.analysis.summary}</p>
                   {trendResult.analysis.top_picks?.length > 0 && (
                     <>
-                      <p className={styles.sectionLabel} style={{ marginTop: '12px' }}>Top picks for Limesoda</p>
+                      <p className={styles.sectionLabel} style={{ marginTop: '12px' }}>Top picks for Liberation</p>
                       <div className={styles.tagCloud}>{trendResult.analysis.top_picks.map((p, i) => <span key={i} className={styles.painTag}>#{p}</span>)}</div>
                     </>
                   )}
