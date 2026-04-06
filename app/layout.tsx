@@ -3,7 +3,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Liberation Cocktails Viral Bank',
-  description: 'UGC research tool for Limesoda',
+  description: 'UGC research tool for Liberation',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
