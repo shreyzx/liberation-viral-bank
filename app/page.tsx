@@ -341,19 +341,19 @@ export default function Home() {
                 <div className={styles.analysisCard}>
                   <div className={styles.section}>
                     <p className={styles.sectionLabel}>Hook patterns that are working</p>
-                    {compResult.analysis.hook_patterns.map((p, i) => <div key={i} className={styles.hookCard}>{p}</div>)}
+                    {(compResult.analysis.hook_patterns || []).map((p, i) => <div key={i} className={styles.hookCard}>{p}</div>)}
                   </div>
                   <div className={styles.section}>
                     <p className={styles.sectionLabel}>Winning angles</p>
-                    <div className={styles.tagCloud}>{compResult.analysis.winning_angles.map((a, i) => <span key={i} className={styles.painTag}>{a}</span>)}</div>
+                    <div className={styles.tagCloud}>{(compResult.analysis.winning_angles || []).map((a, i) => <span key={i} className={styles.painTag}>{a}</span>)}
                   </div>
                   <div className={styles.section}>
                     <p className={styles.sectionLabel}>Content gaps Liberation can own</p>
-                    {compResult.analysis.content_gaps.map((g, i) => <div key={i} className={styles.angleCard}><p className={styles.angleText}>{g}</p></div>)}
+                    {(compResult.analysis.content_gaps || []).map((g, i) => <div key={i} className={styles.angleCard}><p className={styles.angleText}>{g}</p></div>)}
                   </div>
                   <div className={styles.section}>
                     <p className={styles.sectionLabel}>Liberation hooks inspired by this space</p>
-                    <div className={styles.hookGrid}>{compResult.analysis.limesoda_hooks.map((h, i) => <div key={i} className={styles.hookCard}>"{h}"</div>)}</div>
+                    <div className={styles.hookGrid}>{(compResult.analysis.limesoda_hooks || []).map((h, i) => <div key={i} className={styles.hookCard}>"{h}"</div>)}
                   </div>
                   <div className={styles.section}>
                     <p className={styles.sectionLabel}>Best persona fit</p>
