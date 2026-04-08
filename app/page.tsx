@@ -345,7 +345,7 @@ export default function Home() {
                   </div>
                   <div className={styles.section}>
                     <p className={styles.sectionLabel}>Winning angles</p>
-                    <div className={styles.tagCloud}>{(compResult.analysis.winning_angles || []).map((a, i) => <span key={i} className={styles.painTag}>{a}</span>)}
+                    <div className={styles.tagCloud}>{(compResult.analysis.winning_angles || []).map((a, i) => <span key={i} className={styles.painTag}>{a}</span>)}</div>
                   </div>
                   <div className={styles.section}>
                     <p className={styles.sectionLabel}>Content gaps Liberation can own</p>
@@ -353,7 +353,7 @@ export default function Home() {
                   </div>
                   <div className={styles.section}>
                     <p className={styles.sectionLabel}>Liberation hooks inspired by this space</p>
-                    <div className={styles.hookGrid}>{(compResult.analysis.limesoda_hooks || []).map((h, i) => <div key={i} className={styles.hookCard}>"{h}"</div>)}
+                    <div className={styles.hookGrid}>{(compResult.analysis.limesoda_hooks || []).map((h, i) => <div key={i} className={styles.hookCard}>"{h}"</div>)}</div>
                   </div>
                   <div className={styles.section}>
                     <p className={styles.sectionLabel}>Best persona fit</p>
