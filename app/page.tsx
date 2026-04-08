@@ -51,6 +51,7 @@ type CompetitorResult = {
     winning_angles: string[]
     content_gaps: string[]
     limesoda_hooks: string[]
+    liberation_hooks?: string[]
     persona_fit: string
     creator_notes: string
   }
@@ -353,8 +354,7 @@ export default function Home() {
                   </div>
                   <div className={styles.section}>
                     <p className={styles.sectionLabel}>Liberation hooks inspired by this space</p>
-                    <div className={styles.hookGrid}>{(compResult.analysis.limesoda_hooks || []).map((h, i) => <div key={i} className={styles.hookCard}>"{h}"</div>)}</div>
-                  </div>
+                    {(compResult.analysis.liberation_hooks || compResult.analysis.limesoda_hooks || []).map((h, i) => <div key={i} className={styles.hookCard}>"{h}"</div>)}</div>
                   <div className={styles.section}>
                     <p className={styles.sectionLabel}>Best persona fit</p>
                     <p style={{ fontSize: '14px', lineHeight: 1.65 }}>{compResult.analysis.persona_fit}</p>
