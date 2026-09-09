@@ -40,7 +40,7 @@ Text to analyze:
 ${text.substring(0, 4000)}`
 
     const message = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-5',
       max_tokens: 1200,
       messages: [{ role: 'user', content: prompt }]
     })
