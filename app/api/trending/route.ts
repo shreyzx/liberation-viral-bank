@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const hashtags = [...tally.values()]
+    const hashtags = Array.from(tally.values())
       .sort((a, b) => b.views - a.views)
       .slice(0, 30)
       .map((h) => ({ name: h.name, views: h.views, isNew: h.count === 1 }))
