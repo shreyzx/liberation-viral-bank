@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
         likeCount: v.statistics?.digg_count || v.stats?.diggCount || 0,
         commentCount: v.statistics?.comment_count || v.stats?.commentCount || 0,
         author: v.author?.unique_id || v.author?.uniqueId || '',
+        url: v.share_url || `https://www.tiktok.com/@${v.author?.unique_id || v.author?.uniqueId || ''}/video/${v.aweme_id || v.id || ''}`,
         authorFollowers: v.author_stats?.follower_count || v.authorStats?.followerCount || 0,
       }
     }).filter((v: any) => v.id)
@@ -96,7 +97,7 @@ Respond ONLY in this exact JSON, no markdown, no preamble:
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-5',
-      max_tokens: 1200,
+      max_tokens: 4000,
       messages: [{ role: 'user', content: prompt }]
     })
 
@@ -120,6 +121,6 @@ Respond ONLY in this exact JSON, no markdown, no preamble:
 
   } catch (err) {
     console.error(err)
-    return NextResponse.json({ error: 'Analysis failed. Check your API keys and try again.' }, { status: 500 })
+        return NextResponse.json({ error: String((err as any)?.message || err) }, { status: 500 })
   }
 }
