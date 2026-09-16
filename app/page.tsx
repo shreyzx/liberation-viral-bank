@@ -45,7 +45,7 @@ type AnalysisResult = {
 type CompetitorResult = {
   keyword: string
   videoCount: number
-  topVideos: { desc: string; playCount: number; likeCount: number; author: string }[]
+  topVideos: { desc: string; playCount: number; likeCount: number; author: string; url?: string }[]
   analysis: {
     hook_patterns: string[]
     winning_angles: string[]
@@ -329,7 +329,11 @@ export default function Home() {
                       <tbody>
                         {compResult.topVideos.map((v, i) => (
                           <tr key={i} style={{ borderBottom: '1px solid var(--surface2)' }}>
-                            <td style={{ padding: '8px 6px', maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.desc || '—'}</td>
+                                 <td style={{ padding: '8px 6px', maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {v.url
+                                ? <a href={v.url} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit' }}>{v.desc || 'View video'}</a>
+                                : (v.desc || '—')}
+                            </td>
                             <td style={{ padding: '8px 6px', whiteSpace: 'nowrap', fontFamily: 'var(--mono)', fontSize: '12px' }}>{formatViews(v.playCount)}</td>
                             <td style={{ padding: '8px 6px', whiteSpace: 'nowrap', fontFamily: 'var(--mono)', fontSize: '12px' }}>{formatViews(v.likeCount)}</td>
                             <td style={{ padding: '8px 6px', whiteSpace: 'nowrap', color: 'var(--text-muted)' }}>@{v.author}</td>
