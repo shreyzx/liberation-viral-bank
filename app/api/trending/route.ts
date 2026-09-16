@@ -4,32 +4,63 @@ import { NextRequest, NextResponse } from 'next/server'
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 const SCRAPE_KEY = process.env.SCRAPECREATORS_API_KEY
 
+const SEED_KEYWORDS = [
+  'cocktails at home',
+  'pre mixed cocktails',
+  'house party drinks',
+  'festival drinks',
+]
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
     const period = searchParams.get('period') || '7'
 
-    const hashtagRes = await fetch(
-      `https://api.scrapecreators.com/v1/tiktok/hashtags/popular?period=${period}&countryCode=GB&page=1`,
-      { headers: { 'x-api-key': SCRAPE_KEY! } }
+    const batches = await Promise.all(
+      SEED_KEYWORDS.map(async (kw) => {
+        const res = await fetch(
+          `https://api.scrapecreators.com/v1/tiktok/search/keyword?query=${encodeURIComponent(kw)}&trim=true`,
+          { headers: { 'x-api-key': SCRAPE_KEY! } }
+        )
+        if (!res.ok) {
+          const body = await res.text()
+          throw new Error(`ScrapeCreators ${res.status} on "${kw}": ${body.slice(0, 200)}`)
+        }
+        const json = await res.json()
+        return json?.search_item_list ?? []
+      })
     )
-    const hashtagData = await hashtagRes.json()
 
-    if (!hashtagRes.ok || !hashtagData?.list?.length) {
-      return NextResponse.json({ error: 'Could not fetch trending hashtags. Check your ScrapeCreators API key.' }, { status: 500 })
+    const tally = new Map<string, { name: string; views: number; count: number }>()
+
+    for (const item of batches.flat()) {
+      const info = item?.aweme_info ?? item
+      const caption: string = info?.desc ?? ''
+      const views: number = info?.statistics?.play_count ?? 0
+      for (const raw of caption.match(/#[\p{L}\p{N}_]+/gu) ?? []) {
+        const name = raw.slice(1).toLowerCase()
+        if (name.length < 2) continue
+        const cur = tally.get(name) ?? { name, views: 0, count: 0 }
+        cur.views += views
+        cur.count += 1
+        tally.set(name, cur)
+      }
     }
 
-    const hashtags = hashtagData.list.slice(0, 30).map((h: any) => ({
-      name: h.hashtag_name || h.name || '',
-      views: h.video_views || h.publish_cnt || 0,
-      isNew: h.is_new || false,
-    })).filter((h: any) => h.name)
+    const hashtags = [...tally.values()]
+      .sort((a, b) => b.views - a.views)
+      .slice(0, 30)
+      .map((h) => ({ name: h.name, views: h.views, isNew: h.count === 1 }))
 
-    const hashtagList = hashtags.map((h: any, i: number) =>
+    if (!hashtags.length) {
+      return NextResponse.json({ error: 'No hashtags found in returned videos.' }, { status: 502 })
+    }
+
+    const hashtagList = hashtags.map((h, i) =>
       `${i + 1}. #${h.name} — ${h.views > 1000000 ? (h.views / 1000000).toFixed(1) + 'M' : (h.views / 1000).toFixed(0) + 'K'} views${h.isNew ? ' [NEW]' : ''}`
     ).join('\n')
 
-    const prompt = `You are a UGC growth strategist for Liberation Cocktails — a UK brand selling mixologist-grade pre-mixed cocktails in cans, pouches, and party kegs. No bartender needed, bar quality, ready to drink anywhere. UK market focus.
+    const prompt = `You are a UGC growth strategist for Liberation Cocktails, a UK brand selling mixologist-grade pre-mixed cocktails in cans, pouches, and party kegs. No bartender needed, bar quality, ready to drink anywhere. UK market focus.
 
 Liberation's 4 buyer personas:
 - PARTY_HOST: hosting home/garden parties, birthdays, anniversaries. Wants to impress without the hassle.
@@ -39,10 +70,10 @@ Liberation's 4 buyer personas:
 
 Core message: Mixologist-grade cocktails, no bartender needed, ready whenever and wherever you are.
 
-Here are the current trending TikTok hashtags in the United Kingdom (last ${period} days):
+These hashtags are currently attached to high-performing UK TikTok content in and around the drinks category, ranked by total views:
 ${hashtagList}
 
-For each relevant trend, provide how Liberation Cocktails could create content riding that trend, which persona it fits, and a specific hook in British English. Ignore irrelevant hashtags.
+For each relevant trend, give how Liberation could create content riding it, which persona it fits, and a specific hook in British English. Ignore irrelevant hashtags.
 
 Respond ONLY in this exact JSON, no markdown, no preamble:
 {
@@ -62,19 +93,17 @@ Respond ONLY in this exact JSON, no markdown, no preamble:
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-5',
       max_tokens: 1500,
-      messages: [{ role: 'user', content: prompt }]
+      messages: [{ role: 'user', content: prompt }],
     })
 
     const content = message.content[0]
-    if (content.type !== 'text') throw new Error('Unexpected response')
+    if (content.type !== 'text') throw new Error('Unexpected response type')
 
-    const clean = content.text.replace(/```json|```/g, '').trim()
-    const analysis = JSON.parse(clean)
+    const analysis = JSON.parse(content.text.replace(/```json|```/g, '').trim())
 
     return NextResponse.json({ success: true, period, hashtags, analysis })
-
-  } catch (err) {
+  } catch (err: any) {
     console.error(err)
-    return NextResponse.json({ error: 'Failed to fetch trends. Check your API keys and try again.' }, { status: 500 })
+    return NextResponse.json({ error: String(err?.message || err) }, { status: 500 })
   }
 }
