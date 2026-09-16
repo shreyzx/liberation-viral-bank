@@ -100,10 +100,14 @@ Respond ONLY in this exact JSON, no markdown, no preamble:
       messages: [{ role: 'user', content: prompt }]
     })
 
-    const content = message.content[0]
-    if (content.type !== 'text') throw new Error('Unexpected response')
+    const text = message.content
+      .filter((b: any) => b.type === 'text')
+      .map((b: any) => b.text)
+      .join('\n')
 
-    const clean = content.text.replace(/```json|```/g, '').trim()
+    if (!text) throw new Error('No text block in model response')
+
+    const clean = text.replace(/```json|```/g, '').trim()
     const analysis = JSON.parse(clean)
 
     return NextResponse.json({
