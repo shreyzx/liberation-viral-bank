@@ -75,6 +75,8 @@ ${hashtagList}
 
 For each relevant trend, give how Liberation could create content riding it, which persona it fits, and a specific hook in British English. Ignore irrelevant hashtags.
 
+Return at most 6 opportunities. Keep each "angle" and "hook" under 20 words.
+
 Respond ONLY in this exact JSON, no markdown, no preamble:
 {
   "opportunities": [
@@ -92,7 +94,7 @@ Respond ONLY in this exact JSON, no markdown, no preamble:
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-5',
-      max_tokens: 1500,
+      max_tokens: 4000,
       messages: [{ role: 'user', content: prompt }],
     })
 
@@ -103,7 +105,13 @@ Respond ONLY in this exact JSON, no markdown, no preamble:
 
 if (!text) throw new Error('No text block in model response')
 
-const analysis = JSON.parse(text.replace(/```json|```/g, '').trim())
+    const raw = text.replace(/```json|```/g, '').trim()
+    let analysis
+    try {
+      analysis = JSON.parse(raw)
+    } catch {
+      throw new Error(`Bad JSON (${raw.length} chars), ends with: ${raw.slice(-200)}`)
+    }
 
     return NextResponse.json({ success: true, period, hashtags, analysis })
   } catch (err: any) {
