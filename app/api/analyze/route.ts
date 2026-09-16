@@ -45,14 +45,14 @@ ${text.substring(0, 4000)}`
       messages: [{ role: 'user', content: prompt }]
     })
 
-    const text = message.content
+    const responseText = message.content
       .filter((b: any) => b.type === 'text')
       .map((b: any) => b.text)
       .join('\n')
 
-    if (!text) throw new Error('No text block in model response')
+    if (!responseText) throw new Error('No text block in model response')
 
-    const clean = text.replace(/```json|```/g, '').trim()
+    const clean = responseText.replace(/```json|```/g, '').trim()
     const parsed = JSON.parse(clean)
 
     return NextResponse.json({ success: true, source: source || 'Unnamed source', data: parsed })
