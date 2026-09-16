@@ -96,10 +96,14 @@ Respond ONLY in this exact JSON, no markdown, no preamble:
       messages: [{ role: 'user', content: prompt }],
     })
 
-    const content = message.content[0]
-    if (content.type !== 'text') throw new Error('Unexpected response type')
+    const text = message.content
+  .filter((b: any) => b.type === 'text')
+  .map((b: any) => b.text)
+  .join('\n')
 
-    const analysis = JSON.parse(content.text.replace(/```json|```/g, '').trim())
+if (!text) throw new Error('No text block in model response')
+
+const analysis = JSON.parse(text.replace(/```json|```/g, '').trim())
 
     return NextResponse.json({ success: true, period, hashtags, analysis })
   } catch (err: any) {
