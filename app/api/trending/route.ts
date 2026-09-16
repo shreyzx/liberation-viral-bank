@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
       const info = item?.aweme_info ?? item
       const caption: string = info?.desc ?? ''
       const views: number = info?.statistics?.play_count ?? 0
-      for (const raw of caption.match(/#[\p{L}\p{N}_]+/gu) ?? []) {
+      for (const raw of caption.match(/#[A-Za-z0-9_]+/g) ?? []) {
         const name = raw.slice(1).toLowerCase()
         if (name.length < 2) continue
         const cur = tally.get(name) ?? { name, views: 0, count: 0 }
