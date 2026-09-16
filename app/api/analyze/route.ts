@@ -41,19 +41,23 @@ ${text.substring(0, 4000)}`
 
     const message = await client.messages.create({
       model: 'claude-sonnet-5',
-      max_tokens: 1200,
+      max_tokens: 4000,
       messages: [{ role: 'user', content: prompt }]
     })
 
-    const content = message.content[0]
-    if (content.type !== 'text') throw new Error('Unexpected response type')
+    const text = message.content
+      .filter((b: any) => b.type === 'text')
+      .map((b: any) => b.text)
+      .join('\n')
 
-    const clean = content.text.replace(/```json|```/g, '').trim()
+    if (!text) throw new Error('No text block in model response')
+
+    const clean = text.replace(/```json|```/g, '').trim()
     const parsed = JSON.parse(clean)
 
     return NextResponse.json({ success: true, source: source || 'Unnamed source', data: parsed })
   } catch (err) {
     console.error(err)
-    return NextResponse.json({ error: 'Analysis failed. Check your API key and try again.' }, { status: 500 })
+    return NextResponse.json({ error: String((err as any)?.message || err) }, { status: 500 })
   }
 }
