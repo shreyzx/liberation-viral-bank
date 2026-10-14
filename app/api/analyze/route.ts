@@ -3,6 +3,24 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
+// Pulls clean JSON out of a model response: strips fences, slices to the
+// outermost { ... }, and removes trailing commas before } or ].
+function extractJson(raw: string): string {
+  let s = raw.replace(/```json\s*|```/g, '').trim()
+
+  const first = s.indexOf('{')
+  const last = s.lastIndexOf('}')
+  if (first === -1 || last === -1 || last < first) {
+    throw new Error('No JSON object found in model response')
+  }
+  s = s.slice(first, last + 1)
+
+  // Remove trailing commas: ,} or ,] (with optional whitespace between)
+  s = s.replace(/,(\s*[}\]])/g, '$1')
+
+  return s
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { text, source } = await req.json()
@@ -23,7 +41,7 @@ Analyze the following raw social media text. Extract:
 3. angles: For each of the 4 personas, write a 3-sentence script angle. Sentence 1 = hook. Sentence 2 = agitate the problem or desire. Sentence 3 = introduce Liberation Cocktails as the resolution (keep it natural, not salesy).
 4. raw_quotes: 3-5 direct quotes or paraphrased phrases from the text particularly useful as creative inspiration.
 
-Respond ONLY in this exact JSON format, no markdown, no preamble, no trailing text:
+Respond ONLY in this exact JSON format, no markdown, no preamble, no trailing text. Do not put a comma after the last item in any list or object:
 {
   "pain_points": ["string"],
   "hooks": ["string"],
@@ -41,7 +59,7 @@ ${text.substring(0, 4000)}`
 
     const message = await client.messages.create({
       model: 'claude-sonnet-5',
-      max_tokens: 4000,
+      max_tokens: 8000,
       messages: [{ role: 'user', content: prompt }]
     })
 
@@ -52,8 +70,19 @@ ${text.substring(0, 4000)}`
 
     if (!responseText) throw new Error('No text block in model response')
 
-    const clean = responseText.replace(/```json|```/g, '').trim()
-    const parsed = JSON.parse(clean)
+    let parsed
+    try {
+      parsed = JSON.parse(extractJson(responseText))
+    } catch (parseErr) {
+      console.error('JSON parse failed. Raw model output:', responseText)
+      return NextResponse.json(
+        {
+          error: `Model returned malformed JSON: ${(parseErr as any)?.message || parseErr}`,
+          raw: responseText
+        },
+        { status: 502 }
+      )
+    }
 
     return NextResponse.json({ success: true, source: source || 'Unnamed source', data: parsed })
   } catch (err) {
